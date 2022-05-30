@@ -3,6 +3,7 @@ pub mod connexion_manager {
     use std::net::TcpStream;
     use std::{thread, time};
     use std::process::exit;
+    use crate::server_manager::server_manager::*;
 
     pub fn gestion_connexion(flux: TcpStream) {
         println!("New connection from : {}", &flux.peer_addr().unwrap());
@@ -14,16 +15,30 @@ pub mod connexion_manager {
             reader.read_line(&mut line).expect("TODO: panic message");
 
             line = line.trim().parse().unwrap();
-            if line == "exit" {
-                println!("exiting");
-                thread::sleep(time::Duration::from_secs(3));
-                exit(0);
+
+
+            match line.as_str() {
+                "exit" => {
+                    println!("exiting");
+                    thread::sleep(time::Duration::from_secs(3));
+                    exit(0);
+                }
+                "start" => {
+                    println!("start");
+                    start_server();
+
+                }
+                "stop" => {
+                    println!("stop");
+                }
+                _ => {
+                    println!(
+                        "New line from {}  : \"{}\" ",
+                        &flux.peer_addr().unwrap(),
+                        line
+                    );
+                }
             }
-            println!(
-                "New line from {}  : \"{}\" ",
-                &flux.peer_addr().unwrap(),
-                line
-            );
         }
     }
 }
