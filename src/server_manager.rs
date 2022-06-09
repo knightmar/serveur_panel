@@ -4,38 +4,24 @@ use std::thread::{JoinHandle, Thread};
 
 pub mod server_manager {
     use std::io::Stdout;
-    use std::process::ChildStdout;
-    use std::thread;
-    use tokio::io::AsyncReadExt;
-    use tokio::process::Command;
+    use std::process::{ChildStdout, Command};
+    use std::{thread, time};
     use std::io::Write;
 
-    #[tokio::main]
-    pub async fn start_server() {
+    pub fn start_server() {
+        let command = Command::new("sh").args(&["-c", "screen -S mc_server -dm java -jar server.jar nogui"]).current_dir("./server").status().expect("");
+        let mut last: Vec<u8> = Vec::new();
+        let mut log = String::new();
 
-        let server_thread = thread::spawn(move || {
-            let mut child = Command::new("cmd")
-                .current_dir("server")
-                .args(&["/C", "java -jar server.jar --nogui"])
-                .spawn()
-                .expect("failed to spawn");
-
-            let mut file = std::fs::File::create("data.txt").expect("create failed");
-            file.write_all("Hello World".as_bytes()).expect("write failed");
-            println!("data written to file" );
-
-        });
-        // The usage is similar as with the standard library's `Command` type
-
+        loop {
+            thread::sleep(time::Duration::from_secs_f64(0.10));
+            let out = Command::new("tail").args(&["-n 1", "latest.log"]).current_dir("./server/logs").output().expect("test").stdout;
+            if out != last && out.len() > 0 {
+                last = out.clone();
+                log = String::from_utf8_lossy(&out[..out.len() - 1]).to_string();
+                println!("{}", log);
+            }
+        }
     }
 }
 
-
-// let server = thread::spawn(move || {
-//     Command::new("cmd")
-//         .current_dir("server")
-//         .args(&["/C", "java -jar server.jar --nogui"])
-//         .stdout(Stdio::inherit())
-//         .spawn()
-//         .expect("ls command failed to start");
-// });

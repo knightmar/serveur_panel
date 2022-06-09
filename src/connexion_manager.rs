@@ -1,5 +1,5 @@
 pub mod connexion_manager {
-    use std::io::{BufRead, BufReader};
+    use std::io::{BufRead, BufReader, BufWriter};
     use std::net::TcpStream;
     use std::{thread, time};
     use std::process::exit;
@@ -9,6 +9,7 @@ pub mod connexion_manager {
         println!("New connection from : {}", &flux.peer_addr().unwrap());
 
         let mut reader = BufReader::new(&flux);
+        let mut writer = BufWriter::new(&flux);
         loop {
             let mut line = String::new();
 
