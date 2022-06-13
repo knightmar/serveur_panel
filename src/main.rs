@@ -34,12 +34,12 @@ fn main() {
         }
     }
 
-    println!("Serveur is launching on {}", "0.0.0.0:".to_owned() + &port);
+    println!("Server is launching on {}", "0.0.0.0:".to_owned() + &port);
 
     let listener = TcpListener::bind("0.0.0.0:".to_owned() + &port).unwrap();
 
     for flux in listener.incoming() {
-        let flux = flux.unwrap();
-        gestion_connexion(flux);
+        let mut flux = flux.unwrap();
+        gestion_connexion(&mut flux);
     }
 }

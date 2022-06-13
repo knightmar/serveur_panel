@@ -1,15 +1,16 @@
 pub mod connexion_manager {
-    use std::io::{BufRead, BufReader, BufWriter};
+    use std::io::{BufRead, BufReader, BufWriter, Write};
     use std::net::TcpStream;
     use std::{thread, time};
     use std::process::exit;
     use crate::server_manager::server_manager::*;
 
-    pub fn gestion_connexion(flux: TcpStream) {
+    pub fn gestion_connexion(flux: &TcpStream) {
         println!("New connection from : {}", &flux.peer_addr().unwrap());
 
-        let mut reader = BufReader::new(&flux);
-        let mut writer = BufWriter::new(&flux);
+        let mut reader = BufReader::new(flux);
+        let mut writer = BufWriter::new(flux);
+
         loop {
             let mut line = String::new();
 
@@ -26,16 +27,18 @@ pub mod connexion_manager {
                 }
                 "start" => {
                     println!("start");
-                    start_server();
-
+                    start_server(&flux);
                 }
                 "stop" => {
                     println!("stop");
                 }
                 _ => {
+                    println!("writing");
+                    writer.write(line.as_bytes()).unwrap();
+                    writer.flush().unwrap();
                     println!(
                         "New line from {}  : \"{}\" ",
-                        &flux.peer_addr().unwrap(),
+                        flux.peer_addr().unwrap(),
                         line
                     );
                 }
