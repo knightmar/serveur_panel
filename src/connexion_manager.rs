@@ -5,11 +5,11 @@ pub mod connexion_manager {
     use std::process::exit;
     use crate::server_manager::server_manager::*;
 
-    pub fn gestion_connexion(flux: &TcpStream) {
+    pub fn gestion_connexion(flux: TcpStream) {
         println!("New connection from : {}", &flux.peer_addr().unwrap());
 
-        let mut reader = BufReader::new(flux);
-        let mut writer = BufWriter::new(flux);
+        let mut reader = BufReader::new(&flux);
+        let mut writer = BufWriter::new(&flux);
 
         loop {
             let mut line = String::new();
@@ -33,8 +33,8 @@ pub mod connexion_manager {
                     println!("stop");
                 }
                 _ => {
-                    println!("writing");
-                    writer.write(line.as_bytes()).unwrap();
+                    line.push_str("\n");
+                    writer.write_all(line.as_ref()).unwrap();
                     writer.flush().unwrap();
                     println!(
                         "New line from {}  : \"{}\" ",

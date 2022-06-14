@@ -6,6 +6,7 @@ mod server_manager;
 use std::env;
 use std::net::TcpListener;
 use crate::connexion_manager::connexion_manager::*;
+use std::{net, thread};
 
 fn main() {
 
@@ -40,6 +41,8 @@ fn main() {
 
     for flux in listener.incoming() {
         let mut flux = flux.unwrap();
-        gestion_connexion(&mut flux);
+        thread::spawn(move || {
+            gestion_connexion(flux);
+        });
     }
 }
