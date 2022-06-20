@@ -4,7 +4,7 @@ use std::thread::{JoinHandle, Thread};
 
 pub mod server_manager {
     use std::io::{BufWriter, Stdout};
-    use std::process::{ChildStdout, Command};
+    use std::process::{ChildStdout, Command, exit};
     use std::{thread, time};
     use std::fs::copy;
     use std::io::Write;
@@ -21,14 +21,17 @@ pub mod server_manager {
 
         loop {
             thread::sleep(time::Duration::from_secs_f64(0.10));
-            let out = String::from_utf8(Command::new("tail").args(&["-n 1", "latest.log"]).current_dir("./server/logs").output().expect("test").stdout).unwrap();
+            let mut out = String::from_utf8(Command::new("tail").args(&["-n 1", "latest.log"]).current_dir("./server/logs").output().expect("test").stdout).unwrap();
+            out = out.trim().parse().unwrap();
             if out != last {
                 last = out;
                 last.push_str("\n\n");
                 writer.write_all(last.as_ref()).expect("TODO: panic message");
-                writer.flush().expect("TODO: panic message");
-                println!("sended");
-                println!("{}", last)
+                let flush = writer.flush();
+                if !flush.is_ok() {
+                    eprintln!("Connexion ended");
+                    exit(0);
+                }
             }
         }
 
